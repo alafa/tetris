@@ -97,6 +97,8 @@ def watch_ai_play():
 def play_human():
     env = TetrisEnv()
     visualizer = TetrisVisualizer(env)
+
+    last_time = time.time()
     
     while True:
         state = env.reset()
@@ -118,17 +120,25 @@ def play_human():
                     elif event.key == pygame.K_UP:
                         action = 2
                     elif event.key == pygame.K_DOWN:
-                        action = 3
-                    
+                        action = 4               
+
                     if action is not None:
                         next_state, reward, done = env.step(action)
                         total_reward += reward
                         state = next_state
-            
+
+            # Check if one second has passed
+            current_time = time.time()
+            if current_time - last_time >= 1.0:
+                next_state, reward, done = env.step(3)
+                total_reward += reward
+                state = next_state
+                last_time = current_time  # Reset the timer
+
             # Update visualization
             visualizer.draw_board(state)
             time.sleep(0.05)
-        
+
         print(f"Game Over! Score: {total_reward}")
         time.sleep(1)
 

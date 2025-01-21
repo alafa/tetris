@@ -54,6 +54,7 @@ class TetrisEnv:
         1: Move right
         2: Rotate
         3: Move down
+        4: Push to bottom
         """
         reward = 0
         done = False
@@ -75,6 +76,18 @@ class TetrisEnv:
                 if self._check_collision():
                     done = True
                     reward = -10  # Penalty for game over
+
+        elif action == 4:  # Push to bottom
+            self._push_to_bottom()
+            self._freeze_piece()
+            cleared_lines = self._clear_lines()
+            reward = self._calculate_reward(cleared_lines)
+            self.current_piece = self._get_random_piece()
+            self.current_pos = [0, self.BOARD_WIDTH // 2 - len(self.current_piece[0]) // 2]
+
+        if self._check_collision():
+            done = True
+            reward = -10  # Penalty for game over
 
         return self._get_state(), reward, done
 
@@ -98,6 +111,10 @@ class TetrisEnv:
             self.current_pos[0] = new_y
             return True
         return False
+    
+    def _push_to_bottom(self):
+        while self._move_down():
+            pass
 
     def _is_valid_move(self, y, x, piece=None):
         if piece is None:
